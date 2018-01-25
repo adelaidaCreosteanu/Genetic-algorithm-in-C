@@ -11,6 +11,8 @@
 #define TRUE 1
 #define FALSE 0
 
+#define MUTATION_RATE 0.02
+
 struct Generation {
     int number;
     char population[POPULATION_SIZE][NUMBER_GENES];
@@ -24,6 +26,7 @@ void evaluate_fitness(char pop[][NUMBER_GENES], int fit[]);
 void print_generation(struct Generation *gen);
 int reached_goal(struct Generation *gen);
 void reproduce(struct Generation *parents, struct Generation *children);
+    int select_parent(struct Generation *gen, int totalFitness);
 
 int main() {
     size_t memoryNeeded = sizeof(char) * NUMBER_GENES * POPULATION_SIZE + sizeof(int) * (POPULATION_SIZE+1);
@@ -95,6 +98,18 @@ void reproduce(struct Generation *parents, struct Generation *children) {
     // Returns children
 
     // Notes: make separate functions for: evaluating fitness, producing an individual
+}
+
+int select_parent(struct Generation *gen, int totalFitness) {
+    int choice = rand() % totalFitness + 1;
+    int individual = 0;
+
+    while (choice > 0) {
+        choice -= gen->fitness[individual];
+        individual ++;
+    }
+
+    return individual - 1;
 }
 
 void print_generation(struct Generation *gen) {
