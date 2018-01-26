@@ -30,6 +30,7 @@ void reproduce_generation(struct Generation *lastGen, struct Generation *newGen)
     void reproduce_two_organisms(const char *parentA, const char *parentB, char *siblingA, char *siblingB);
     void apply_mutation(char child[]);
 void evaluate_fitness(struct Organism pop[]);
+int total_fitness(struct Organism pop[]);
 int reached_goal(struct Organism pop[]);
 void print_generation(struct Generation *gen);
 
@@ -68,8 +69,6 @@ void random_strings(struct Organism pop[]) {
         for (int c = 0; c < NUMBER_GENES; c ++) {
             int selection = rand() % ALLELES;
             pop[o].genes[c] = GENE_ALPHABET[selection];
-
-//            strncpy(&(pop[o].genes[c]), &(GENE_ALPHABET[selection]),1);
         }
     }
 }
