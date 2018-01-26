@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <math.h>
 
 #define POPULATION_SIZE 20
 #define GOAL            "To be or not to be"
@@ -13,7 +14,7 @@
 #define FALSE 0
 
 struct Organism {
-    int fitness;
+    float fitness;
     char genes[NUMBER_GENES];
 };
 
@@ -26,11 +27,11 @@ struct Generation {
 void initialise_population(struct Generation *genZero);
     void random_strings(struct Organism pop[]);
 void reproduce_generation(struct Generation *lastGen, struct Generation *newGen);
-    int select_parent(struct Organism pop[], int totalFitness);
+    int select_parent(struct Organism pop[], float totalFitness);
     void reproduce_two_organisms(const char *parentA, const char *parentB, char *siblingA, char *siblingB);
     void apply_mutation(char child[]);
 void evaluate_fitness(struct Organism pop[]);
-int total_fitness(struct Organism pop[]);
+float total_fitness(struct Organism pop[]);
 int reached_goal(struct Organism pop[]);
 void print_generation(struct Generation *gen);
 
@@ -44,9 +45,8 @@ int main() {
 //        parents = children;
 //    } while (!reached_goal(parents));
 
-    evaluate_fitness(parents->population);
-    print_generation(parents);
     reproduce_generation(parents, children);
+    print_generation(parents);
     print_generation(children);
 
 //    printf("To get to goal \"%s\", it took %d generations.", GOAL, parents->number);
@@ -74,10 +74,9 @@ void random_strings(struct Organism pop[]) {
 }
 
 void evaluate_fitness(struct Organism pop[]) {
-    int current;
+    float current;
 
     for (int o = 0; o < POPULATION_SIZE; o ++) {
-        pop[o].fitness = 0;
         current = 0;
 
         // calculate fitness for this individual
@@ -87,12 +86,16 @@ void evaluate_fitness(struct Organism pop[]) {
             }
         }
 
+        // In case this is a sucker, at least he doesn't have 0 chance
+        if (current == 0) {
+            current = 0.1;
+        }
         pop[o].fitness = current;
     }
 }
 
-int total_fitness(struct Organism *pop) {
-    int fit = 0;
+float total_fitness(struct Organism *pop) {
+    float fit = 0;
 
     for (int o = 0; o < POPULATION_SIZE; o ++) {
         fit += pop[o].fitness;
@@ -110,7 +113,7 @@ void reproduce_generation(struct Generation *lastGen, struct Generation *newGen)
     struct Organism *children = newGen->population;
 
     evaluate_fitness(parents);
-    int totalFitness = total_fitness(parents);
+    float totalFitness = total_fitness(parents);
 
     int sanityCheck = 0;
 
@@ -137,8 +140,8 @@ void reproduce_generation(struct Generation *lastGen, struct Generation *newGen)
 }
 
 // Returns index of selected parent
-int select_parent(struct Organism pop[], int totalFitness) {
-    int choice = rand() % (totalFitness + 1);
+int select_parent(struct Organism pop[], float totalFitness) {
+    int choice = rand() % (int) floor(totalFitness);
 
     for (int parent = 0; parent < POPULATION_SIZE; parent ++) {
         choice -= pop[parent].fitness;
@@ -200,12 +203,12 @@ void print_generation(struct Generation *gen) {
         }
 
         // Print their fitness score:
-        printf("    fitness: %d\n", org->fitness);
+        printf("    fitness: %3.1f\n", org->fitness);
     }
 
-    if(reached_goal(gen)) {
-        printf("Generation reached goal.");
+    if(reached_goal(gen->population)) {
+        printf("Generation reached goal.\n\n");
     } else {
-        printf("Generation is imperfect.");
+        printf("Generation is imperfect.\n\n");
     }
 }
