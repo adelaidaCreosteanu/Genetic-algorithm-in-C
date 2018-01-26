@@ -3,8 +3,8 @@
 #include <time.h>
 #include <math.h>
 
-#define POPULATION_SIZE 20
-#define GOAL            "To be or not to be"
+#define POPULATION_SIZE 100
+#define GOAL            "unicorn"
 #define NUMBER_GENES    (sizeof GOAL - 1)
 #define GENE_ALPHABET   "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ "
 #define ALLELES         (sizeof GENE_ALPHABET - 1)
@@ -40,18 +40,18 @@ int main() {
     struct Generation *children = malloc(sizeof(struct Generation));
     initialise_population(parents);
 
-//    do {
-//        reproduce_generation(parents, children);
-//        parents = children;
-//    } while (!reached_goal(parents));
+    while (!reached_goal(parents->population)) {
+        reproduce_generation(parents, children);
+        parents = children;
+    }
 
-    reproduce_generation(parents, children);
+    printf("To get to goal \"%s\", it took %d generations.", GOAL, parents->number);
     print_generation(parents);
-    print_generation(children);
 
-//    printf("To get to goal \"%s\", it took %d generations.", GOAL, parents->number);
     free(parents);
     free(children);
+
+    return 1;
 }
 
 void initialise_population(struct Generation *genZero) {
@@ -112,7 +112,6 @@ void reproduce_generation(struct Generation *lastGen, struct Generation *newGen)
     struct Organism *parents = lastGen->population;
     struct Organism *children = newGen->population;
 
-    evaluate_fitness(parents);
     float totalFitness = total_fitness(parents);
 
     int sanityCheck = 0;
@@ -182,6 +181,8 @@ void apply_mutation(char child[]) {
 
 // Just checks if any individual has perfect fitness
 int reached_goal(struct Organism pop[]) {
+    evaluate_fitness(pop);
+
     for (int o = 0; o < POPULATION_SIZE; o ++) {
         if (pop[o].fitness == NUMBER_GENES) {      // NEEDS TO BE MODIFIED if fitness function is changed
             return TRUE;
